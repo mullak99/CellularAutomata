@@ -48,15 +48,10 @@ def runSimulationOnce(grid, probImmune, probLightning):
     n = len(pGrid)
     for i in range(n):
         for j in range(n):
-            nIm = i - 1
-            nIp = i + 1
-            nJm = j - 1
-            nJp = j + 1
             isImmune = random.random()
             if (gridE[i][j] == 1 and (isImmune < probImmune)):
                 isLightning = random.random()
-                if (((nIm > 0 and gridE[nIm][j] == 2) or (nIp < n and gridE[nIp][j] == 2) or (
-                        nJm > 0 and gridE[i][nJm] == 2) or (nJp < n and gridE[i][nJp] == 2))):
+                if (IsNeighbourBurning(grid, i, j)):
                     if (isImmune < probImmune and gridE[i][j] == 1):
                         pGrid[i][j] = 2  # A neighbour is burning AND this tree isn't immune
                     else:
@@ -70,13 +65,24 @@ def runSimulationOnce(grid, probImmune, probLightning):
     rGrid = removeGridBoundary(pGrid)
     return rGrid
 
+def IsNeighbourBurning(grid, x, y):
+    xM = x - 1
+    xP = x + 1
+    yM = y - 1
+    yP = y + 1
+    n = len(grid)
+    if (((xM > 0 and grid[xM][y] == 2) or (xP < n and grid[xP][y] == 2) or (
+            yM > 0 and grid[x][yM] == 2) or (yP < n and grid[x][yP] == 2))):
+        return True
+    return False
 
-def runSimulation(grid, probImmune, probLightning, times):
+
+def runSimulation(probTree, probBurning, probImmune, probLightning, gridSize, times):
     grids = [None] * times
     for i in range(times):
         if (i > 0):
             gridNext = grids[i - 1]
         else:
-            gridNext = grid
+            gridNext = createForestGrid(probTree, probBurning, gridSize)
         grids[i] = runSimulationOnce(gridNext, probImmune, probLightning)
     return grids
